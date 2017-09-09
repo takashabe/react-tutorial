@@ -11,11 +11,11 @@ function Square(props) {
 }
 
 class Board extends React.Component {
-  renderSquare(i) {
+  renderSquare(i, j) {
     return (
       <Square
-        value={this.props.squares[i]}
-        onClick={() => this.props.onClick(i)}
+        value={this.props.squares[i][j]}
+        onClick={() => this.props.onClick(i, j)}
       />
     );
   }
@@ -24,19 +24,19 @@ class Board extends React.Component {
     return (
       <div>
         <div className="board-row">
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
+          {this.renderSquare(0, 0)}
+          {this.renderSquare(0, 1)}
+          {this.renderSquare(0, 2)}
         </div>
         <div className="board-row">
-          {this.renderSquare(3)}
-          {this.renderSquare(4)}
-          {this.renderSquare(5)}
+          {this.renderSquare(1, 0)}
+          {this.renderSquare(1, 1)}
+          {this.renderSquare(1, 2)}
         </div>
         <div className="board-row">
-          {this.renderSquare(6)}
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
+          {this.renderSquare(2, 0)}
+          {this.renderSquare(2, 1)}
+          {this.renderSquare(2, 2)}
         </div>
       </div>
     );
@@ -44,22 +44,42 @@ class Board extends React.Component {
 }
 
 function calculateWinner(squares) {
-  const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
-  for (let i = 0; i < lines.length; i++) {
-    const [a, b, c] = lines[i];
-    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
+  // check x lines
+  for (let i = 0; i < 3; i++) {
+    if (
+      squares[i][0] &&
+      squares[i][0] === squares[i][1] &&
+      squares[i][0] === squares[i][2]
+    ) {
+      return squares[(i, 0)];
     }
   }
+  // check y lines
+  for (let i = 0; i < 3; i++) {
+    if (
+      squares[0][i] &&
+      squares[0][i] === squares[1][i] &&
+      squares[0][i] === squares[2][i]
+    ) {
+      return squares[0][i];
+    }
+  }
+  // check slanting lines
+  if (
+    squares[0][0] &&
+    squares[0][0] === squares[1][1] &&
+    squares[0][0] === squares[2][2]
+  ) {
+    return squares[0][0];
+  }
+  if (
+    squares[2][0] &&
+    squares[2][0] === squares[1][1] &&
+    squares[2][0] === squares[0][2]
+  ) {
+    return squares[2][0];
+  }
+
   return null;
 }
 
@@ -69,7 +89,7 @@ class Game extends React.Component {
     this.state = {
       history: [
         {
-          squares: Array(9).fill(null),
+          squares: [...Array(3)].map(() => Array(3).fill(null)),
         },
       ],
       stepNumber: 0,
@@ -85,16 +105,16 @@ class Game extends React.Component {
     }
   }
 
-  handleClick(i) {
+  handleClick(i, j) {
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
 
     // already finished game, or already filled squares
-    if (calculateWinner(squares) || squares[i]) {
+    if (calculateWinner(squares) || squares[i][j]) {
       return;
     }
-    squares[i] = this.getPlayer();
+    squares[i][j] = this.getPlayer();
     this.setState({
       history: history.concat([
         {
@@ -117,6 +137,7 @@ class Game extends React.Component {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
+    console.log('winner:' + winner);
 
     const moves = history.map((step, move) => {
       const desc = move ? 'Move #' + move : 'Game start';
@@ -139,7 +160,10 @@ class Game extends React.Component {
     return (
       <div className="game">
         <div className="game-board">
-          <Board squares={current.squares} onClick={i => this.handleClick(i)} />
+          <Board
+            squares={current.squares}
+            onClick={(i, j) => this.handleClick(i, j)}
+          />
         </div>
         <div className="game-info">
           <div>{status}</div>
