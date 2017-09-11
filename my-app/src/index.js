@@ -87,6 +87,7 @@ class Game extends React.Component {
           squares: [...Array(3)].map(() => Array(3).fill(null)),
         },
       ],
+      historyOrder: true,
       stepNumber: 0,
       xIsNext: true,
     };
@@ -124,6 +125,12 @@ class Game extends React.Component {
     });
   }
 
+  handleToggle(order) {
+    this.setState({
+      historyOrder: !order,
+    });
+  }
+
   jumpTo(step) {
     this.setState({
       stepNumber: step,
@@ -135,6 +142,11 @@ class Game extends React.Component {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
+    const toggle = (
+      <button onClick={() => this.handleToggle(this.state.historyOrder)}>
+        Toggle
+      </button>
+    );
 
     const moves = history.map((step, move) => {
       let desc = move ? 'Move #' + move : 'Game start';
@@ -155,7 +167,14 @@ class Game extends React.Component {
       status = 'Winner: ' + winner;
     } else {
       status = 'Next player: ' + this.getPlayer();
+    if (this.state.historyOrder === false) {
+      moves.reverse();
     }
+    const movesList = this.state.historyOrder ? (
+      <ol>{moves}</ol>
+    ) : (
+      <ol reversed>{moves}</ol>
+    );
 
     return (
       <div className="game">
@@ -167,7 +186,8 @@ class Game extends React.Component {
         </div>
         <div className="game-info">
           <div>{status}</div>
-          <ol>{moves}</ol>
+          <div>{toggle}</div>
+          {movesList}
         </div>
       </div>
     );
