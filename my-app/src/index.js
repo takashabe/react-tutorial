@@ -161,12 +161,6 @@ class Game extends React.Component {
         </li>
       );
     });
-
-    let status;
-    if (winner) {
-      status = 'Winner: ' + winner;
-    } else {
-      status = 'Next player: ' + this.getPlayer();
     if (this.state.historyOrder === false) {
       moves.reverse();
     }
@@ -175,6 +169,10 @@ class Game extends React.Component {
     ) : (
       <ol reversed>{moves}</ol>
     );
+
+    const status = winner
+      ? 'Winner: ' + winner
+      : 'Next player: ' + this.getPlayer();
 
     return (
       <div className="game">
